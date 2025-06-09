@@ -1,8 +1,10 @@
 from unstructured.partition.pdf import partition_pdf
-import pickle
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from utils.save_load_files import reload
 
-
-def extract_pdf(file_name):
+def extractor(file_name):
     """
     Extract the pdf
     """
@@ -16,49 +18,30 @@ def extract_pdf(file_name):
     )
     return pdf_elements
 
-def save_extracted_files(pdf_elements):
-    with open('ISRO_elements.pkl', 'wb') as file: 
-        pickle.dump(pdf_elements, file)
 
-def load_extracted_files():
-    with open("ISRO_elements.pkl", "rb") as f:
-        pdf_elements = pickle.load(f)
-    return pdf_elements
+def elements_extractor(pdf_elements):
+    # Assign each key as a variable dynamically
+    extracted_elements = {}
+    for element in pdf_elements:
+        class_name = element.__class__.__name__
+        extracted_elements.setdefault(class_name, []).append(str(element))
+    # Image
+    # NarrativeText
+    # Title
+    # Text
+    # ListItem
+    # Table
+    # FigureCaption
+    # Header
+    return extracted_elements
 
-def extract_elements(pdf_elements):
-    print(f"Total : {len(pdf_elements)}")
-    elements_category = set()
-    for elements in pdf_elements:
-        class_name = elements.__class__.__name__
-        elements_category.add(class_name)
-    print(f"Categories are : {elements_category}")
-    Image = []
-    Text = []
-    FigureCaption = []
-    NarrativeText = []
-    Title = []
-    ListItem = []
-    Header = []
-    Table = []
-    for elements in pdf_elements:
-        class_name = elements.__class__.__name__
-        if class_name == "Image":
-            Image.append(str(elements))
-        elif class_name == "Text":
-            Text.append(str(elements))
-        elif class_name == "FigureCaption":
-            FigureCaption.append(str(elements))
-        elif class_name == "NarrativeText":
-            NarrativeText.append(str(elements))
-        elif class_name == "Title":
-            Title.append(str(elements))
-        elif class_name == "ListItem":
-            ListItem.append(str(elements))
-        elif class_name == "Header":
-            Header.append(str(elements))
-        elif class_name == "Table":
-            Table.append(str(elements))
-    return Image, Text, FigureCaption, NarrativeText, Title, ListItem, Header, Table
+def pdf_extractor(file_path):
+    pdf_elements = reload("pdf_elements.pkl", extractor, file_path)
+    extracted_elements = reload("categorized_elements", elements_extractor, pdf_elements)
+    print(extracted_elements.keys())
+    
+
 
 if __name__ == "__main__":
-    file_name = r"../src/ISRO_annual_report_24-25.pdf"
+    file_name = r"../data/ISRO_annual_report_24-25.pdf"
+    pdf_extractor(file_name)
