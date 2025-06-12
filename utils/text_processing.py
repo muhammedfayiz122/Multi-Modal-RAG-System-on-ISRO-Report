@@ -3,18 +3,18 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 import time
 
-def table_chain():
+def text_chain():
 
     template = """
-    You are an assistant tasked with summarizing tables .
-    Give a concise summary of the table.
-    This tables are from ISRO annual report.
+    You are an assistant tasked with summarizing text .
+    Give a concise summary of the text.
+    This text are from ISRO annual report.
 
-    Respond only with the summary, no additionnal comment.
+    Respond only with the summary, no additional comment.
     Do not start your message by saying "Here is a summary" or anything like that.
     Just give the summary as it is.
 
-    Table : {element}
+    Text : {element}
 
     """
     prompt = ChatPromptTemplate.from_template(template)
@@ -32,27 +32,27 @@ def table_chain():
 
 
 
-def summarize_table_sequencial(tables):
+def summarize_text_sequencial(table):
     """
     """ 
-    error_row = []
-    table_summaries = []
-    summarize_chain = table_chain()
-    for i, row in enumerate(tables):
+    error_text = []
+    text_summaries = []
+    summarize_chain = text_chain()
+    for i, row in enumerate(table):
         try:
             summary = summarize_chain.invoke(row)
-            table_summaries.append(summary)
-            time.sleep(2)
+            text_summaries.append(summary)
+            time.sleep(1)
         except Exception as e:
-            print(f"error on table {i} : {e}")
-            error_row.append(i)
-            table_summaries.append(None)
+            print(f"error on {i}th text : {e}")
+            error_text.append(i)
+            text_summaries.append(None)
             time.sleep(4)
 
-def summarize_table_batch(tables):
-    summarize_chain = table_chain()
+def summarize_text_batch(text):
+    summarize_chain = text_chain()
     try:
-        table_summaries = summarize_chain.batch(tables, {"max_concurrency": 3})
+        table_summaries = summarize_chain.batch(text, {"max_concurrency": 3})
     except Exception as e:
         print(f"Error in summarizing table : {e}")
         print(f"Total summarized = {len(table_summaries)}")

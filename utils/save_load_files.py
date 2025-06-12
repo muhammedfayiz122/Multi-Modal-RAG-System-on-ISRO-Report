@@ -53,8 +53,9 @@ def load_pickle(load_file:str):
 
     return pickle_file
 
-def reload(pickle_file: str, func: Callable[[str], any], file_path: str):
-
+def reload(pickle_file: str, func: Callable[[str], any], parameter: str):
+    """
+    """
     # Loading pickle file
     load_obj = load_pickle(pickle_file)
     # If there is no pickle file , creating it by running function
@@ -62,8 +63,11 @@ def reload(pickle_file: str, func: Callable[[str], any], file_path: str):
         if pickle_file[-4:] != ".pkl":
             pickle_file += ".pkl"
         print(f"{pickle_file} file not exists. \nCreating...")
-        save_obj = func(file_path)
-        save_as_pickle(save_obj, pickle_file)
+        save_obj = func(parameter)
+        if save_obj:
+            save_as_pickle(save_obj, pickle_file)
+        else:
+            print("Saving error : nothing returned by function {func.__name__}")
         return save_obj
     return load_obj
 
