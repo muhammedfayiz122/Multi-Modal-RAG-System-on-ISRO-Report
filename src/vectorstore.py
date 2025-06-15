@@ -10,7 +10,7 @@ def setup_vector_store(embeddings):
     # Vector Store
     vector_store = Milvus(
         embedding_function=embeddings,
-        index_params={"index_type":"HNSW", "metric_type": "L2"},
+        index_params={"index_type":"IVF_FLAT", "metric_type": "COSINE"},
         connection_args={
             "host": "localhost",
             "port": "19530"
