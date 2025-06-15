@@ -1,7 +1,7 @@
 
 from unstructured.partition.pdf import partition_pdf
 
-def extractor(file_name):
+def extractor(file_name, images_path="extracted_images"):
     """
     Extract the pdf
     """
@@ -11,7 +11,7 @@ def extractor(file_name):
         extract_images_in_pdf=True,
         extract_image_block_types=["Image", "Table"],
         extract_image_block_to_payload=False,
-        extract_image_block_output_dir="temp_ISRO"
+        extract_image_block_output_dir=images_path
     )
     return pdf_elements
 

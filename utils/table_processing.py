@@ -4,7 +4,6 @@ from langchain_core.output_parsers import StrOutputParser
 import time
 
 def table_chain():
-
     template = """
     You are an assistant tasked with summarizing tables .
     Give a concise summary of the table.
@@ -18,16 +17,13 @@ def table_chain():
 
     """
     prompt = ChatPromptTemplate.from_template(template)
-
     model = ChatGroq(temperature=0.5, model="llama-3.1-8b-instant")
-
     chain = (
         {"element" : lambda x: x}
         | prompt
         | model
         | StrOutputParser()
     )
-
     return chain
 
 

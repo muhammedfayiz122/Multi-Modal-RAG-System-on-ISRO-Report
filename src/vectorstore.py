@@ -33,3 +33,14 @@ def multi_vector_retriever(vector_store, docstore, id_key):
         id_key=id_key,
     )
     return retriever
+
+def add_texts(text_doc, text_ids, retriever):
+    retriever.vectorstore.add_documents(text_doc, id_key=text_ids)
+
+def add_tables(retriever, table_doc, table_ids, table):
+    retriever.vectorstore.add_documents(table_doc)
+    retriever.docstore.mset(list(zip(table_ids, table)))
+
+def add_images(retriever, image_doc, img_base64_list, image_ids):
+    retriever.vectorstore.add_documents(image_doc)
+    retriever.docstore.mset(list(zip(image_ids, img_base64_list)))

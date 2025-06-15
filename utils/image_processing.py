@@ -1,10 +1,12 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain.schema import HumanMessage, SystemMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain.schema import HumanMessage, SystemMessage
 from dotenv import load_dotenv
+from PIL import Image
 import base64
 import time
+import io
 import os
 
 load_dotenv()
@@ -86,3 +88,21 @@ def generate_img_summary(path: str):
                 error_images.append(img_path)
                 time.sleep(8)
     return img_base64_list, img_summaries, error_images
+
+def resize_base64_images(base64_string, size=(128, 128)):
+    """
+    function for resize images that we can easily feed into models
+    """
+    # Decode the Base64 string
+    img_data = base64.b64decode(base64_string)
+    img = Image.open(io.BytesIO(img_data))
+
+    # Resize the image
+    resized_img = img.resize(size, Image.LANCZOS)
+
+    # Save the resized image to a bytes buffer
+    buffered = io.BytesIO()
+    resized_img.save(buffered, format=img.format)
+
+    # Encode the resized image to Base64
+    return base64.b64ecode(buffered.getvalue()).decode("utf-8")

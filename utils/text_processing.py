@@ -4,7 +4,6 @@ from langchain_core.output_parsers import StrOutputParser
 import time
 
 def text_chain():
-
     template = """
     You are an assistant tasked with summarizing text .
     Give a concise summary of the text.
@@ -14,20 +13,16 @@ def text_chain():
     Do not start your message by saying "Here is a summary" or anything like that.
     Just give the summary as it is.
 
-    Text : {element}
-
+    \nText : {element}
     """
     prompt = ChatPromptTemplate.from_template(template)
-
     model = ChatGroq(temperature=0.5, model="llama-3.1-8b-instant")
-
     chain = (
         {"element" : lambda x: x}
         | prompt
         | model
         | StrOutputParser()
     )
-
     return chain
 
 
