@@ -166,10 +166,11 @@ def pdf_extractor(file_path):
     img_vs_doc, img_ds_doc  = image_to_documents(images_path, img_elements, img_summaries, bs64_images)
 
     return {
-        "table_vs": table_vs_doc,
-        "table_ds": table_ds_doc,
-        "img_vs": img_vs_doc,
-        "img_ds_doc": img_ds_doc
+        "elements": pdf_elements,
+        "table_summary": table_vs_doc,
+        "table_raw": table_ds_doc,
+        "img_sumamry": img_vs_doc,
+        "img_raw": img_ds_doc
     }
 
 

@@ -3,8 +3,8 @@ from utils.logger import logging
 import time
 
 def generate_embedding_model(model, document):
-    contents = [doc.page_conten for doc in document]
-    vector = model.encode(contents)
+    contents = [doc.page_content for doc in document]
+    vector = model.encode(contents).tolist()
     return vector
 
 
