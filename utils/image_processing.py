@@ -93,16 +93,20 @@ def resize_base64_images(base64_string, size=(128, 128)):
     """
     function for resize images that we can easily feed into models
     """
-    # Decode the Base64 string
-    img_data = base64.b64decode(base64_string)
-    img = Image.open(io.BytesIO(img_data))
+    try:
+        # Decode the Base64 string
+        img_data = base64.b64decode(base64_string)
+        img = Image.open(io.BytesIO(img_data))
 
-    # Resize the image
-    resized_img = img.resize(size, Image.LANCZOS)
+        # Resize the image
+        resized_img = img.resize(size, Image.LANCZOS)
 
-    # Save the resized image to a bytes buffer
-    buffered = io.BytesIO()
-    resized_img.save(buffered, format=img.format)
+        # Save the resized image to a bytes buffer
+        buffered = io.BytesIO()
+        resized_img.save(buffered, format=img.format)
 
-    # Encode the resized image to Base64
-    return base64.b64ecode(buffered.getvalue()).decode("utf-8")
+        # Encode the resized image to Base64
+        return base64.b64ecode(buffered.getvalue()).decode("utf-8")
+    except Exception as e:
+        print("Failed to resize image:", e)
+        return None

@@ -198,3 +198,5 @@ data/
 output/
 logs/
 volumes/
+
+utils/partition_pdf.py

@@ -1,5 +1,6 @@
 
-from unstructured.partition.pdf import partition_pdf
+# from unstructured.partition.pdf import partition_pdf
+import partition_pdf
 from utils.logger import logging
 
 def extractor(file_name, images_path="extracted_images"):

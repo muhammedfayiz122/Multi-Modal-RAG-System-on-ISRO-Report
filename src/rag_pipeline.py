@@ -8,6 +8,14 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.messages import HumanMessage
 from utils.image_processing import resize_base64_images
+from utils.logger import logging
+
+def format_doc(doc):
+    # Filter metadata to exclude 'doc_id'
+    filtered_meta = {k: v for k, v in doc.metadata.items() if k != "doc_id"}
+    meta_str = ", ".join(f"{k}: {v}" for k, v in filtered_meta.items())
+    return f"[Metadata: {meta_str}]\n{doc.page_content}"
+
 
 def split_image_text_types(docs):
     """
@@ -21,8 +29,11 @@ def split_image_text_types(docs):
 
     for doc in docs:
         if doc.metadata.get("type") == "Image":
+            if not isinstance(doc.page_content, str):
+                print(f"Warning: Skipping non-string image content: {type(doc.page_content)}")
+                continue
             # its image
-            resized_image = resize_base64_images(doc, size=(1300, 600))
+            resized_image = resize_base64_images(doc.page_content, size=(1300, 600))
             images.append(resized_image)
 
         elif doc.metadata.get("type") == "Table":
@@ -32,12 +43,14 @@ def split_image_text_types(docs):
             # its text
             texts.append(doc)
 
+    logging.info(f"retrieved status : images={len(images)}, texts={len(texts)}, tables: {len(tables)}")
+    return {"images": images, "texts": texts, "tables": tables}
+
 
 def img_prompt_func(data):
     """
     Prepares messages for GPT-4 Vision with images, texts, and tables.
     """
-    print(data)
     
     images = data["context"].get("images", [])
     texts = data["context"].get("texts", [])
@@ -54,25 +67,29 @@ def img_prompt_func(data):
         })
 
     # Prepare table section (merge into main text message)
-    combined_text = "\n".join(texts)
+    combined_text = "\n".join(format_doc(doc) for doc in texts)
     if tables:
-        table_block = "\n\n[Table Data]\n" + "\n\n".join(tables)
+        table_block = "\n\n[Table Data]\n" + "\n\n".join(format_doc(doc) for doc in tables)
         combined_text += table_block
 
     # Final text message
-    prompt_text = (
-        "You are a helpful assistant.\n"
-        "Use the following information (text and/or images and/or tables) to answer the user's question.\n\n"
-        f"User Question:\n{question}\n\n"
-        "Context:\n"
-        f"{combined_text}"
+    prompt_text = (f"""
+        You are an assistant tasked with answering user query.
+        Use the following piece of retrived context (text and/or images and/or tables) to answer user queries.
+        if Context is non related to user question ignore it."
+                   
+        User Question:{question}
+
+        Context:
+        {combined_text}
+        """
     )
 
     messages.append({
         "type": "text",
         "text": prompt_text,
     })
-
+    logging.info(f"query sent to LLM : {combined_text}")
     return [HumanMessage(content=messages)]
 
 
@@ -80,24 +97,9 @@ def create_rag_chain(retriever):
     """
     For creating RAG chain
     """
-    # Prompt
-    template = """You are an assistant tasked with answerign user query.
-    Use the following piece of retrived context to anser user queries.
-    if Context is non related to query ignore it.
-    If you dont know the answer , just say that you don't know.
-    keep the answer consise.
-    \nQuestion: {question}
-    \nContext: {context}
-    """
-    prompt = PromptTemplate(
-        template=template,
-        input_variables=['context', 'question'],
-    )
 
     # Model
     model = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
-    # Output Parser
-    parser = StrOutputParser()
 
     #chain
     rag_chain =  (
