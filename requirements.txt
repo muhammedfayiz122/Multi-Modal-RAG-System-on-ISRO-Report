@@ -28,3 +28,4 @@ pyvips
 opensearch-py
 langchain-community
 langchain_milvus
+redis

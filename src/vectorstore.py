@@ -5,18 +5,18 @@
 from langchain_milvus import Milvus
 from langchain.retrievers.multi_vector import MultiVectorRetriever
 from langchain.storage import InMemoryStore
-from langchain.storage.redis import RedisStore
+from langchain_community.storage import RedisStore
 from utils.save_load_files import reload_json
 from utils.logger import logging
-from embedder import load_embedding_model, generate_embedding_model
+from embedder import load_embedding_model
 
 docstore = RedisStore(redis_url="redis://localhost:6379")
 embedding_model = load_embedding_model()
 
-def setup_vector_store(embedding_model):
+def setup_vector_store():
     # Vector Store
     vector_store = Milvus(
-        embedding_function=embedding_model.encode,
+        embedding_function=embedding_model,
         index_params={
             "index_type":"IVF_FLAT", 
             "metric_type": "COSINE",
@@ -46,26 +46,23 @@ def add_documents(retriever, summary_docs, raw_docs, ):
     for id in ids:
         if id in existing_ids:
             print("Error : trying to add existing id")
-            logging.info("Error : trying to add existing id")
+            logging.info("Error : trying to add existing id ")
             return
     doc_type = summary_docs[0].metadata["type"] 
-    vectors = reload_json(f"vectors/{doc_type}_vectors.json", generate_embedding_model, embedding_model, summary_docs)
-    logging.info(f"Generated {doc_type} vectors")
+    logging.info(f"Adding {doc_type} documents...")
    
-
     # Add vectorized summary documents
-    retriever.vectorstore.add_vectors(
-        vectors=vectors,
+    retriever.vectorstore.add_documents(
         documents=summary_docs,
         ids=ids
     )
 
-    # Add documnets in DocStore
+    # Add raw documents in DocStore
     retriever.docstore.mset(list(zip(ids, raw_docs)))
-    logging.info(f"Adding {doc_type} documents completed")
+    logging.info(f"Adding {doc_type} documents successfully")
 
 def get_retriever():
-    vector_store = setup_vector_store(embedding_model=embedding_model)
+    vector_store = setup_vector_store()
     retriever = multi_vector_retriever(vector_store=vector_store)
     return retriever
 

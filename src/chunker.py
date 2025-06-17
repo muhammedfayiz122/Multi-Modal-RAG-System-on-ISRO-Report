@@ -20,7 +20,7 @@ def text_chunker(pdf_elements):
     """
     chunked_elements = make_chunks(pdf_elements)
     texts, text_elements, _, _ = elements_wise_extractor(chunked_elements, "CompositeElement")
-    summaries = reload_json("text_summaries.json", summarize_texts, texts)
+    summaries = reload_json("summaries/text_summaries.json", summarize_texts, texts)
     doc_for_vectorstore, doc_for_docstore = text_to_documents(text_elements, texts, summaries)
     return doc_for_vectorstore, doc_for_docstore
 

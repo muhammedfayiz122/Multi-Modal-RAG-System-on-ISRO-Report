@@ -158,18 +158,18 @@ def pdf_extractor(file_path):
 
     # Making table summaries
     table_summaries = reload_json("summaries/table_summaries.json", summarize_tables, tables)
-    table_vs_doc, table_ds_doc = table_to_documents(table_elements, table_summaries)
+    table_vs_doc, table_ds_doc = table_to_documents(table_elements, tables, table_summaries)
 
     # Making image summaries
     img_summaries = reload_json("summaries/image_summaries.json", summarize_images, images_path)
-    bs64_images = reload_json("encodes/image_encodes.json", encode_image, )
+    bs64_images = reload_json("encodes/image_encodes.json", image_to_base64, images_path)
     img_vs_doc, img_ds_doc  = image_to_documents(images_path, img_elements, img_summaries, bs64_images)
 
     return {
         "elements": pdf_elements,
         "table_summary": table_vs_doc,
         "table_raw": table_ds_doc,
-        "img_sumamry": img_vs_doc,
+        "img_summary": img_vs_doc,
         "img_raw": img_ds_doc
     }
 

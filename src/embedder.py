@@ -2,10 +2,10 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from utils.logger import logging
 import time
 
-def generate_embedding_model(model, document):
-    contents = [doc.page_content for doc in document]
-    vector = model.encode(contents).tolist()
-    return vector
+# def generate_embedding_model(model, document):
+#     contents = [doc.page_content for doc in document]
+#     vector = model.encode(contents).tolist()
+#     return vector
 
 
 
