@@ -16,7 +16,6 @@ def load_embedding_model():
         model_name="intfloat/e5-base-v2",
         encode_kwargs={
             'normalize_embeddings': True,
-            'show_progress_bar': True,
             'convert_to_tensor': True
             } 
         

@@ -6,11 +6,14 @@ from langchain_milvus import Milvus
 from langchain.retrievers.multi_vector import MultiVectorRetriever
 from langchain.storage import InMemoryStore
 from langchain_community.storage import RedisStore
+from utils.mongodb_docstore import MongoDBDocStore
+from langchain.storage import InMemoryStore
 from utils.save_load_files import reload_json
 from utils.logger import logging
 from embedder import load_embedding_model
 
-docstore = RedisStore(redis_url="redis://localhost:6379")
+
+docstore = MongoDBDocStore()
 embedding_model = load_embedding_model()
 
 def setup_vector_store():
@@ -33,7 +36,7 @@ def setup_vector_store():
 def multi_vector_retriever(vector_store):
     retriever = MultiVectorRetriever(
         vectorstore=vector_store,
-        docstore=docstore,
+        docstore=MongoDBDocStore(),
         id_key="doc_id",
     )
     return retriever

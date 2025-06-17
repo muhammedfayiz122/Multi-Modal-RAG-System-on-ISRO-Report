@@ -1,15 +1,13 @@
 version: '3.5'
 
 services:
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb
+  redis:
+    image: redis:7
+    container_name: redis
     ports:
-      - "27017:27017"
-    volumes:
-      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongodb:/data/db
+      - "6379:6379"
     healthcheck:
-      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 30s
       timeout: 10s
       retries: 5

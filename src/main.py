@@ -18,6 +18,11 @@ def main():
     add_documents(retriever, table_summary_doc, table_raw_doc)
     add_documents(retriever, img_summary_doc, img_raw_doc)
 
+    print(retriever.invoke("which are the rockets they launched"))
+
+
+
+
 
 if __name__ == "__main__":
     main()
