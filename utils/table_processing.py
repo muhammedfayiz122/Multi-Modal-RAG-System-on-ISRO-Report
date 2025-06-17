@@ -1,7 +1,10 @@
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from dotenv import load_dotenv
 import time
+
+load_dotenv()
 
 def table_chain():
     template = """
@@ -38,18 +41,21 @@ def summarize_table_sequencial(tables):
         try:
             summary = summarize_chain.invoke(row)
             table_summaries.append(summary)
-            time.sleep(2)
+            time.sleep(1)
         except Exception as e:
             print(f"error on table {i} : {e}")
             error_row.append(i)
             table_summaries.append(None)
             time.sleep(4)
+    print(f"Total summarized = {len(table_summaries)} out of {len(tables)}")
+    return table_summaries
 
 def summarize_table_batch(tables):
     summarize_chain = table_chain()
+    table_summaries = []
     try:
         table_summaries = summarize_chain.batch(tables, {"max_concurrency": 3})
     except Exception as e:
         print(f"Error in summarizing table : {e}")
-        print(f"Total summarized = {len(table_summaries)}")
+        print(f"Total summarized = {len(table_summaries)} out of {len(tables)}")
     return table_summaries

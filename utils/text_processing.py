@@ -1,7 +1,11 @@
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from dotenv import load_dotenv
 import time
+
+load_dotenv()
+
 
 def text_chain():
     template = """
@@ -27,22 +31,32 @@ def text_chain():
 
 
 
-def summarize_text_sequencial(table):
+def summarize_text_sequencial(texts):
     """
     """ 
-    error_text = []
+    error_row = []
     text_summaries = []
     summarize_chain = text_chain()
-    for i, row in enumerate(table):
+    for i, row in enumerate(texts):
         try:
             summary = summarize_chain.invoke(row)
             text_summaries.append(summary)
             time.sleep(1)
         except Exception as e:
-            print(f"error on {i}th text : {e}")
-            error_text.append(i)
-            text_summaries.append(None)
+            retry = 0
+            while not summary:
+                retry += 1
+                if retry > 4:
+                    break
+                time.sleep(4)
+                try:
+                    summary = summarize_chain.invoke(row)
+                    text_summaries.append(summary)
+                    time.sleep(1)
+                except Exception as e:
+                    print(e)
             time.sleep(4)
+    return text_summaries, error_row
 
 def summarize_text_batch(text):
     summarize_chain = text_chain()

@@ -1,3 +1,5 @@
+ipykernel
+tqdm
 pydantic
 python-dotenv
 langchain
