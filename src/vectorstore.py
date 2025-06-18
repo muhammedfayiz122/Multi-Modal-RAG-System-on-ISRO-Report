@@ -26,7 +26,7 @@ def setup_vector_store():
             "params": {"nlist": 128},
         },
         connection_args={
-            "host": "localhost",
+            "host": "milvus",
             "port": "19530",
         },
         collection_name="ISRO_Report_2025"
@@ -46,9 +46,10 @@ def add_documents(retriever, summary_docs, raw_docs, ):
     """
     existing_ids = list(retriever.docstore.yield_keys())
     ids = [doc.metadata["doc_id"] for doc in summary_docs] # Milvus needs ids to be passed separately
+    doc_type = summary_docs[0].metadata["type"]
     for id in ids:
         if id in existing_ids:
-            print("Error : trying to add existing id")
+            print(f"existing id found, skipping {doc_type}")
             logging.info("Error : trying to add existing id ")
             return
     doc_type = summary_docs[0].metadata["type"] 

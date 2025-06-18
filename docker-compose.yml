@@ -76,6 +76,22 @@ services:
       - etcd
       - minio
 
+  streamlit-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: streamlit-isro-rag
+    ports:
+      - "8501:8501"
+    depends_on:
+      - milvus
+      - mongodb
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - .:/app
+    command: streamlit run src/app.py --server.port=8501 --server.address=0.0.0.0
+
 networks:
   default:
     name: milvus

@@ -106,7 +106,7 @@ def resize_base64_images(base64_string, size=(128, 128)):
         resized_img.save(buffered, format=img.format)
 
         # Encode the resized image to Base64
-        return base64.b64ecode(buffered.getvalue()).decode("utf-8")
+        return base64.b64encode(buffered.getvalue()).decode("utf-8")
     except Exception as e:
         print("Failed to resize image:", e)
         return None

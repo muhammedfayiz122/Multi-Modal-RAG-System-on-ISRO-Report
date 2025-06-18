@@ -12,10 +12,8 @@ faiss-cpu
 langchain-google-genai
 pypdf
 hf_xet
-langchain-pinecone
 langchain_experimental
 fastembed
-sentence-transformers
 matplotlib
 ipywidgets
 unstructured[all-docs]
@@ -25,8 +23,9 @@ lxml
 imagehash
 clip
 pyvips
-opensearch-py
 langchain-community
 langchain_milvus
 redis
 pymongo
+streamlit
+sentence-transformers

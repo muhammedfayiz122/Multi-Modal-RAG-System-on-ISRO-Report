@@ -1,13 +1,19 @@
 # def generate_answer(query: str) -> str: ...
 # def retrieve_context(query: str) -> List[str]: ...
 # def summarize_chunks(chunks: List[str]) -> str: ...
-
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from langchain_core.prompts import PromptTemplate 
 from langchain_core.output_parsers import StrOutputParser
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.messages import HumanMessage
 from utils.image_processing import resize_base64_images
+from utils.paths import get_project_root
+from pdf_loader import pdf_extractor
+from chunker import text_chunker
+from vectorstore import get_retriever, add_documents
 from utils.logger import logging
 
 def format_doc(doc):
@@ -109,3 +115,31 @@ def create_rag_chain(retriever):
         |StrOutputParser()
     )
     return rag_chain
+
+def get_rag_pipeline():
+    pdf_path = os.path.join(get_project_root(), "data", "ISRO_annual_report_24-25.pdf")
+    result = pdf_extractor(pdf_path)
+    pdf_elements = result["elements"]
+
+    table_summary_doc, table_raw_doc = result["table_summary"], result["table_raw"]
+    img_summary_doc, img_raw_doc = result["img_summary"], result["img_raw"]
+    text_summary_doc, text_raw_doc = text_chunker(pdf_elements)
+
+    retriever = get_retriever()
+
+    add_documents(retriever, text_summary_doc, text_raw_doc)
+    add_documents(retriever, table_summary_doc, table_raw_doc)
+    add_documents(retriever, img_summary_doc, img_raw_doc)
+
+    # print(retriever.invoke("which are the rockets they launched"))
+
+    rag_chain = create_rag_chain(retriever)
+
+    return rag_chain
+
+def answer_query(query):
+    retriever = get_retriever()
+    rag_chain = create_rag_chain(retriever)
+    return rag_chain.invoke(query)
+
+
