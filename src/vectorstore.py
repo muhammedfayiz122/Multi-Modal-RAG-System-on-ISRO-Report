@@ -1,22 +1,34 @@
-# def store_embeddings(embeddings: List, metadatas: List[dict], index_name: str): ...
-# def search_similar_chunks(query: str, index_name: str) -> List[str]: ...
-# def init_vector_store(): ...
-
+from typing import List
+from langchain_core.documents import Document
 from langchain_milvus import Milvus
 from langchain.retrievers.multi_vector import MultiVectorRetriever
-from langchain.storage import InMemoryStore
 from langchain_community.storage import RedisStore
 from utils.mongodb_docstore import MongoDBDocStore
-from langchain.storage import InMemoryStore
 from utils.save_load_files import reload_json
 from utils.logger import logging
 from embedder import load_embedding_model
 
+"""
+vectorstore.py
+
+This module handles setup and operations for vector storage and retrieval using:
+- Milvus as the vector database
+- MongoDB as the document store
+- MultiVectorRetriever from Langchain to enable hybrid RAG
+
+Supports storing text, table, and image embeddings separately and avoiding duplicates.
+"""
 
 docstore = MongoDBDocStore()
 embedding_model = load_embedding_model()
 
-def setup_vector_store():
+def setup_vector_store() -> Milvus:
+    """
+    Initializes and configures a Milvus vector store.
+
+    Returns:
+        Milvus: Langchain-compatible Milvus vector store.
+    """
     # Vector Store
     vector_store = Milvus(
         embedding_function=embedding_model,
@@ -33,7 +45,16 @@ def setup_vector_store():
     )
     return vector_store
 
-def multi_vector_retriever(vector_store):
+def multi_vector_retriever(vector_store: Milvus) -> MultiVectorRetriever:
+    """
+    Builds a MultiVectorRetriever using Milvus and MongoDB.
+
+    Args:
+        vector_store (Milvus): Milvus instance for semantic search.
+
+    Returns:
+        MultiVectorRetriever: Langchain retriever combining vector and docstore.
+    """
     retriever = MultiVectorRetriever(
         vectorstore=vector_store,
         docstore=MongoDBDocStore(),
@@ -41,8 +62,19 @@ def multi_vector_retriever(vector_store):
     )
     return retriever
 
-def add_documents(retriever, summary_docs, raw_docs, ):
+def add_documents(retriever: MultiVectorRetriever, summary_docs: List[Document], raw_docs: List[Document]) -> None:
     """
+    Adds summary (vector) + raw (docstore) documents to the retriever.
+
+    Skips already existing `doc_id`s to prevent duplication.
+
+    Args:
+        retriever (MultiVectorRetriever): Configured retriever instance.
+        summary_docs (List[Document]): Summarized/embedded documents for semantic retrieval.
+        raw_docs (List[Document]): Full documents for final display.
+
+    Raises:
+        ValueError: If lengths of summary_docs and raw_docs do not match.
     """
     existing_ids = list(retriever.docstore.yield_keys())
     ids = [doc.metadata["doc_id"] for doc in summary_docs] # Milvus needs ids to be passed separately
@@ -65,15 +97,13 @@ def add_documents(retriever, summary_docs, raw_docs, ):
     retriever.docstore.mset(list(zip(ids, raw_docs)))
     logging.info(f"Adding {doc_type} documents successfully")
 
-def get_retriever():
+def get_retriever() -> MultiVectorRetriever:
+    """
+    Returns a retriever with pre-configured Milvus + MongoDB.
+
+    Returns:
+        MultiVectorRetriever: Langchain retriever instance.
+    """
     vector_store = setup_vector_store()
     retriever = multi_vector_retriever(vector_store=vector_store)
     return retriever
-
-
-
-
-
-# def add_images(retriever, image_doc, img_base64_list, image_ids):
-#     retriever.vectorstore.add_documents(image_doc)
-#     retriever.docstore.mset(list(zip(image_ids, img_base64_list)))

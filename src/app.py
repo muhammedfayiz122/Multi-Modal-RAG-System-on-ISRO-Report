@@ -6,7 +6,6 @@ os.environ["STREAMLIT_WATCHER_TYPE"] = "none"
 
 
 def main():
-
     st.set_page_config(page_title="🚀 ISRO RAG Assistant", layout="centered")
     st.title("📡 ISRO Annual Report 2025 – RAG Assistant")
 

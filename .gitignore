@@ -198,5 +198,6 @@ output/
 logs/
 volumes/
 notebooks/
+.temp/
 
 utils/partition_pdf.py
